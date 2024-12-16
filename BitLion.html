@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+	<title>
+		Indice Documenti
+	</title>
+	<style>
+		.link {
+			text-decoration: none;
+			color: black;
+			/**background-color: black;**/
+			font-size: 20px;
+		}
+
+		.link:hover {
+			text-decoration: none;
+			color: grey;
+			/**background-color: black;**/
+			font-size: 20px;
+		}
+
+		textarea {
+			width: 300px;
+			height: 300px;
+		}
+
+		button {
+			border-color: black;
+			width: 100px;
+			height: 20px;
+			border: none;
+			color: black;
+			background-color: burlywood;
+			text-align: center;
+		}
+		button:hover {
+			background-color: rgb(218, 151, 63);
+		}
+		
+	</style>
+	<script>
+		function copy()
+		{
+			var copyText = document.getElementById("stampa");
+
+			copyText.select();
+			navigator.clipboard.writeText(copyText.value);
+		}
+
+		function clean()
+		{
+			document.getElementById("testo").value = "";
+			document.getElementById("stampa").innerHTML = "";
+		}
+
+		//Conversione da decimale a binario
+		function dec_bin(num)
+		{
+			var binary = "";
+
+			while(num!=0)
+			{
+				r = num % 2;
+				num = (num-r)/2;
+				binary = r + binary;
+			}
+			
+			return binary;
+		}
+
+		//Conversione da binario a decimale
+		function bin_dec(num)
+		{
+			let decimale = 0;
+			const length = num.length;
+
+			for(let i=0; i<length; i++)
+			{
+				const cifra = parseInt(num[i]);
+				const esponente = length -1 -i;
+				decimale += cifra * Math.pow(2, esponente);	
+			}
+			return decimale;
+		}
+
+
+		function toBin()
+		{
+			var testo = document.getElementById("testo").value;
+			var split = testo.split('');
+			var result = "";
+
+			for(let i=0; i<split.length; i++)
+			{
+				
+				if(split[i] == ' ')
+				{
+					result += "0100000";
+				}
+				else if(split[i].charCodeAt(0) == 10) 
+				{
+					result += "0001010";
+				}
+				else if (split[i].charCodeAt(0)>=33 && split[i].charCodeAt(0)<=126)
+				{
+					var decimale = dec_bin(split[i].charCodeAt(0));
+					if(decimale.length<7)
+					{
+						decimale = "0" + decimale;
+					}
+					result += decimale;
+				}
+			}
+
+			document.getElementById("stampa").innerHTML = result;
+		}
+
+		function toChar()
+		{	
+			var testo = document.getElementById("testo").value;
+			var split = testo.split('');
+			var result = "";
+			
+			for(let i=0; i<split.length; i=i+7)
+			{
+				{
+					let lettera = "";
+					lettera += split[i];
+					lettera += split[i+1];
+					lettera += split[i+2];
+					lettera += split[i+3];
+					lettera += split[i+4];
+					lettera += split[i+5];
+					lettera += split[i+6];
+
+					var num = bin_dec(lettera);
+					if(num==32)
+					{
+						result += " ";
+					}
+					else
+					{
+						result += String.fromCharCode(num);
+					}
+					
+				}	
+			}
+			document.getElementById("stampa").innerHTML = result;
+		}
+
+	</script>
+</head>
+<body>
+	<div style="margin-left: 15px">
+		<h1>
+			Indice link:
+		</h1>
+		<a class="link" href="https://teamsite.msc.com/sites/together/SitePages/Home.aspx"> Pagina personale MSC </a><br>
+		</div>
+	<div style="margin-left: 15px">
+		<h1>
+			Convertitore v2
+		</h1>
+		<textarea type="text" id="testo" placeholder="es: SCEMO CHI LEGGE"></textarea>
+		<br>
+		<button onclick="toBin()" type="button"> To Binary </button>
+		<button onclick="toChar()" type="button"> To String </button>
+		<button onclick="clean()" type="button"> Delete all </button>
+		<br>
+		<button style="width:308px; margin-top:5px; margin-bottom: 10px; " onclick="copy()" type="button"> Copy to clipboard </button>
+		<br><br>
+		<textarea style="background-color: antiquewhite" id="stampa"></textarea>	
+	</div>
+</html>
