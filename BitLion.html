@@ -35,9 +35,14 @@
 		button:hover {
 			background-color: rgb(218, 151, 63);
 		}
-		
 	</style>
 	<script>
+		window.onload = function()
+		{
+			document.getElementById("test").style.display = "none";
+			document.getElementById("test1").style.display = "none";
+		}
+
 		function copy()
 		{
 			var copyText = document.getElementById("stampa");
@@ -48,6 +53,16 @@
 
 		function clean()
 		{
+			var testo = document.getElementById("testo").value;
+
+			if(testo == "/dev")
+			{
+				alert("Developer's tools enabled")
+
+				document.getElementById("test").style.display = "block";
+				document.getElementById("test1").style.display = "block";
+			}
+
 			document.getElementById("testo").value = "";
 			document.getElementById("stampa").innerHTML = "";
 		}
@@ -109,13 +124,35 @@
 				}
 			}
 
-			document.getElementById("stampa").innerHTML = result;
+			if(document.getElementById("test").style.display == "none")
+			{
+				var res1 = zeroTrust(result);
+				var res2 = unoTrust(res1);
+				document.getElementById("stampa").innerHTML = res2;
+			}
+			else
+			{
+				document.getElementById("stampa").innerHTML = result;
+			}
+
+			
+			
 		}
 
 		function toChar()
 		{	
 			var testo = document.getElementById("testo").value;
-			var split = testo.split('');
+			if(document.getElementById("test").style.display == "none")
+			{
+				var res1 = onlyTrustZero(testo);
+				var res2 = onlyTrustUno(res1);
+				var split = res2.split('');
+			}
+			else
+			{
+				var split = testo.split('');
+			}
+
 			var result = "";
 			
 			for(let i=0; i<split.length; i=i+7)
@@ -139,10 +176,176 @@
 					{
 						result += String.fromCharCode(num);
 					}
-					
 				}	
 			}
 			document.getElementById("stampa").innerHTML = result;
+		}
+
+		function test()
+		{
+			alert("No test functions");
+			//var testo = document.getElementById("testo").value;
+			//var split = testo.split('');
+			//var res2 = onlyTrustZero(testo);
+			//var res3 = onlyTrustUno(res2);
+			//document.getElementById("stampa").innerHTML = res3;
+		}
+
+		function onlyTrustZero(num)
+		{
+			var r = "";
+			for(var i=0; i< num.length; i++)
+			{
+				if(i+1<num.length)
+				{
+					c = num[i+1];
+					if(num[i]==0 && c>1)
+					{
+						for(var j=0; j<c; j++)
+						{
+							r += "0";
+						}
+						i++;
+					}
+					else
+					{
+						if(num == 0)
+						{
+							r += "0";
+						}
+						else
+						{
+							car = num[i];
+							r += car;
+						}
+					}
+				}
+				else if(i+1 == num.length)
+				{
+					car = num[i];
+					r += car;
+				}
+			}
+			return r;
+		}
+
+		function onlyTrustUno(num)
+		{
+			var r = "";
+			for(var i=0; i< num.length; i++)
+			{
+				if(i+1<num.length)
+				{
+					c = num[i+1];
+					if(num[i]==1 && c>1)
+					{
+						for(var j=0; j<c; j++)
+						{
+							r += "1";
+						}
+						i++;
+					}
+					else
+					{
+						if(num == 1)
+						{
+							r += "1";
+						}
+						else
+						{
+							car = num[i];
+							r += car;
+						}
+					}
+				}
+				else if(i+1 == num.length)
+				{
+					car = num[i];
+					r += car;
+				}
+			}
+			return r;
+		}
+
+		function zeroTrust(codice)
+		{
+			var r = "";
+			for(var i=0; i<codice.length;i++)
+			{
+				if(codice[i] == 0)
+				{
+					var z = 1;
+					var flag = true;
+
+					while(i+1<codice.length && flag==true)
+					{
+						if(codice[i+1] == 0)
+						{
+							z++;
+							i++;
+						}
+						else
+						{
+							flag = false;
+						}
+					}
+					if(z == 1)
+					{
+						r += 0;
+					}
+					else
+					{
+						r += "0" + z;
+					}
+					
+				}
+				else
+				{
+					r += codice[i];
+				}
+			}
+			return r;
+		}
+
+
+		function unoTrust(codice)
+		{
+			var r = "";
+			for(var i=0; i<codice.length;i++)
+			{
+				if(codice[i] == 1)
+				{
+					var z = 1;
+					var flag = true;
+
+					while(i+1<codice.length && flag==true)
+					{
+						if(codice[i+1] == 1)
+						{
+							z++;
+							i++;
+						}
+						else
+						{
+							flag = false;
+						}
+					}
+					if(z == 1)
+					{
+						r += 1;
+					}
+					else
+					{
+						r += "1" + z;
+					}
+					
+				}
+				else
+				{
+					r += codice[i];
+				}
+			}
+			return r;
 		}
 
 	</script>
@@ -150,16 +353,24 @@
 <body>
 	<div style="margin-left: 15px">
 		<h1>
-			Converter v2
+			Converter v2.5
 		</h1>
+		<div id="test1">
+			<p style="font-style: italic;">Conversion swapped to version 2</p>
+		</div>
 		<textarea type="text" id="testo" placeholder="es: S3Nd NuD3S"></textarea>
 		<br>
-		<button onclick="toBin()" type="button"> To Binary </button>
-		<button onclick="toChar()" type="button"> To String </button>
+		<button onclick="toBin()" type="button"> Convert </button>
+		<button onclick="toChar()" type="button"> Translate </button>
 		<button onclick="clean()" type="button"> Delete all </button>
 		<br>
 		<button style="width:308px; margin-top:5px; margin-bottom: 10px; " onclick="copy()" type="button"> Copy to clipboard </button>
-		<br><br>
+		<br>
 		<textarea style="background-color: antiquewhite" id="stampa"></textarea>	
+		<br>
+		<div id="test">
+			<button style="width:308px; margin-top:5px; margin-bottom: 10px; " onclick="test()" type="button"> Test </button>
+		</div>	
+		
 	</div>
 </html>
