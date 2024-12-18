@@ -59,6 +59,7 @@
 			{
 				alert("Developer's tools enabled")
 
+				//TODO da riattivare finiti i test
 				document.getElementById("test").style.display = "block";
 				document.getElementById("test1").style.display = "block";
 			}
@@ -124,27 +125,27 @@
 				}
 			}
 
-			if(document.getElementById("test").style.display == "none")
+			if(document.getElementById("test1").style.display == "none")
 			{
 				var res1 = zeroTrust(result);
 				var res2 = unoTrust(res1);
-				document.getElementById("stampa").innerHTML = res2;
+				var res3 = roll(res2);
+				document.getElementById("stampa").innerHTML = res3;
 			}
 			else
 			{
 				document.getElementById("stampa").innerHTML = result;
 			}
-
-			
-			
 		}
+
 
 		function toChar()
 		{	
 			var testo = document.getElementById("testo").value;
-			if(document.getElementById("test").style.display == "none")
+			if(document.getElementById("test1").style.display == "none")
 			{
-				var res1 = onlyTrustZero(testo);
+				var d = deroll(testo);
+				var res1 = onlyTrustZero(d);
 				var res2 = onlyTrustUno(res1);
 				var split = res2.split('');
 			}
@@ -181,14 +182,182 @@
 			document.getElementById("stampa").innerHTML = result;
 		}
 
+
+		function compress1(t,c)
+		{
+			var r = "";
+			var num = 0;
+			var count = 0;
+			var start = "";
+			do
+			{
+				count = 0;
+				r="";
+				
+				for(s=0;s<c;s++)
+				{
+					start += t[s];
+				}
+
+				for(var i=0+c; i<t.length; i++)
+				{
+					if(i+2<t.length)
+					{
+						var b1 = t[i];
+						var b2 = t[i+1];
+						var b3 = t[i+2];
+						var block = b1 + b2 + b3;
+						var fb =  findBlock(block);
+						r+= fb;
+						if(fb != block)
+						{
+							count++;
+						}
+						i = i+2;
+					}
+					else
+					{
+						j=t.length-i;
+						for(var k=0; k<j; k++, i++)
+						{
+							r+=t[i];
+						}
+					}
+				}
+				num = num + count;
+				t = r;
+			}
+			while(count>0)
+			return start+ r;
+		}
+
+
+		function decompress1(t)
+		{
+			var r = "";
+			
+			for(var i=0; i<t.length; i++)
+			{
+				var fb =  returnBlock(t[i]);
+				if(fb!=t[i])
+				{
+					r+= fb;
+				}
+				else
+				{
+					r+=t[i];
+				}
+			}
+			return r;
+		}
+
+		function findBlock(block)
+		{
+			var r = "";
+			switch(block)
+			{
+				case "120":
+					r = "a"
+					break;
+				case "102":
+					r="b";
+				break;
+				case "130":
+					r="c";
+				break;
+				case "140":
+					r="d";
+				break;
+				case "103":
+					r="e";
+				break;
+				case "105":
+					r="f";
+				break;
+				case "215":
+					r="g";
+				break;
+				case "201":
+					r="h";
+				break;
+				case "210":
+					r="i";
+				break;
+				default:
+					r=block;
+					break;
+			}
+			return r;
+		}
+
+		function returnBlock(char)
+		{
+			var r = "";
+			switch(char)
+			{
+				case "a":
+					r = "120"
+					break;
+				case "b":
+					r="102";
+				break;
+				case "c":
+					r="130";
+				break;
+				case "d":
+					r="140";
+				break;
+				case "e":
+					r="103";
+				break;
+				case "f":
+					r="105";
+				break;
+				case "g":
+					r="215";
+				break;
+				case "h":
+					r="201";
+				break;
+				case "i":
+					r="210";
+				break;
+				default:
+					r=char;
+					break;
+			}
+			return r;
+		}
+
+		function roll(testo)
+		{
+			var r = compress1(testo,0);
+			r = compress1(r,1);
+			r = compress1(r,2);
+			return r;
+		}
+
+		function deroll(testo)
+		{
+			var r = decompress1(testo);
+			return r;
+		}
+
 		function test()
 		{
 			alert("No test functions");
-			//var testo = document.getElementById("testo").value;
-			//var split = testo.split('');
-			//var res2 = onlyTrustZero(testo);
-			//var res3 = onlyTrustUno(res2);
-			//document.getElementById("stampa").innerHTML = res3;
+			/*
+			toBin();
+			var testo = document.getElementById("stampa").value;
+			
+			r = roll(testo);
+			d = deroll(r);
+			t1 = onlyTrustZero(d);
+			t2 = onlyTrustUno(t1);
+			//document.getElementById("stampa").innerHTML = "t: " + testo + "\nr: " + r + "\nd: " + d;
+			document.getElementById("stampa").innerHTML = testo + "\n" + r + "\n" + d + "\n" +t2;
+			//document.getElementById("stampa").innerHTML = r;
+			*/
 		}
 
 		function onlyTrustZero(num)
@@ -307,7 +476,6 @@
 			return r;
 		}
 
-
 		function unoTrust(codice)
 		{
 			var r = "";
@@ -353,12 +521,12 @@
 <body>
 	<div style="margin-left: 15px">
 		<h1>
-			Converter v2.5
+			Converter v3
 		</h1>
 		<div id="test1">
 			<p style="font-style: italic;">Conversion swapped to version 2</p>
 		</div>
-		<textarea type="text" id="testo" placeholder="es: S3Nd NuD3S"></textarea>
+		<textarea type="text" id="testo" placeholder="Write here your message"></textarea>
 		<br>
 		<button onclick="toBin()" type="button"> Convert </button>
 		<button onclick="toChar()" type="button"> Translate </button>
