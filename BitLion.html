@@ -93,7 +93,7 @@
 
 			for(let i=0; i<length; i++)
 			{
-				const cifra = parseInt(num[i]);
+				const cifra = parseInt(num[i],10);
 				const esponente = length -1 -i;
 				decimale += cifra * Math.pow(2, esponente);	
 			}
@@ -119,9 +119,14 @@
 					var decimale = dec_bin(split[i].charCodeAt(0));
 					if(decimale.length<7)
 					{
+						//alert("uso questa funzione");
 						decimale = "0" + decimale;
 					}
 					result += decimale;
+				}
+				else
+				{
+					alert("errore nell'inserimento dei caratteri");
 				}
 			}
 			return result;
@@ -135,13 +140,13 @@
 
 			if(document.getElementById("test1").style.display == "none")
 			{
-				var key1 = calcKey1();
-				var key2 = calcKey2();
-				var s1 = cbc(result,key1);
-				var s2 = cbc(reverseString(s1),key2.split(''));
-				var res1 = zeroTrust(s2);
+				//var s1 = cbc(result);
+				//var s2 = cbc(reverseString(s1));
+				var res1 = zeroTrust(result);
 				var res2 = unoTrust(res1);
 				var res3 = roll(res2);
+
+				alert("numero bit result: "+ result.length+"\nresult:\n"+result);
 
 				print(res3);
 				//print(result);
@@ -172,16 +177,14 @@
 			var testo = document.getElementById("testo").value;
 			if(document.getElementById("test1").style.display == "none")
 			{
-				var k1 = calcKey1();
-				var k2 = calcKey2();
 				var d = deroll(testo);
 				var res1 = onlyTrustZero(d);
 				var res2 = onlyTrustUno(res1);
 
-				var res3 = de_cbc(res2,k2);
-				var res4 = de_cbc(reverseString(res3),k1);
+				//var res3 = de_cbc(res2);
+				//var res4 = de_cbc(reverseString(res3));
 
-				var split = res4.split('');
+				var split = res2.split('');
 			}
 			else
 			{
@@ -214,9 +217,13 @@
 					{
 						result += " ";
 					}
-					else
+					else if(num>32 && num<=126)
 					{
 						result += String.fromCharCode(num);
+					}
+					else
+					{
+						//alert("Errore, stai sforando la tabella ascii");
 					}
 				}	
 			}
@@ -550,10 +557,10 @@
 			return r;
 		}
 
-		function cbc(c,key)
+		function cbc(c)
 		{
-			var iv = key;
-			//var iv = "0110011"
+			//var iv = key;
+			var iv = "0110011"
 			var v1 = "";
 			var v2 = "";
 			var v3 = "";
@@ -592,10 +599,10 @@
 			return s;
 		}
 
-		function de_cbc(c,key)
+		function de_cbc(c)
 		{
-			var iv = key;
-			//var iv = "0110011";
+			//var iv = key;
+			var iv = "0110011";
 			var v1 = "";
 			var v2 = "";
 			var v3 = "";
