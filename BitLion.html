@@ -61,7 +61,7 @@
 
 				//TODO da riattivare finiti i test
 				document.getElementById("test").style.display = "block";
-				document.getElementById("test1").style.display = "block";
+				//document.getElementById("test1").style.display = "block";
 			}
 
 			document.getElementById("testo").value = "";
@@ -96,13 +96,9 @@
 			return decimale;
 		}
 
-
-		function toBin()
+		function char_bin(split)
 		{
-			var testo = document.getElementById("testo").value;
-			var split = testo.split('');
 			var result = "";
-
 			for(let i=0; i<split.length; i++)
 			{
 				
@@ -124,20 +120,47 @@
 					result += decimale;
 				}
 			}
+			return result;
+		}
+
+		function toBin()
+		{
+			var testo = getText();
+			var split = testo.split('');
+			var result = char_bin(split);			
 
 			if(document.getElementById("test1").style.display == "none")
 			{
-				var res1 = zeroTrust(result);
+				//TODO da togliere dopo i test su cbc
+				var s1 = cbc(result);
+				var s2 = cbc(reverseString(s1));
+				var res1 = zeroTrust(s2);
 				var res2 = unoTrust(res1);
 				var res3 = roll(res2);
-				document.getElementById("stampa").innerHTML = res3;
+
+				print(res3);
+				//print(result);
 			}
 			else
 			{
-				document.getElementById("stampa").innerHTML = result;
+				print(result);
 			}
 		}
 
+		function getText()
+		{
+			return document.getElementById("testo").value;
+		}
+
+		function getStampa()
+		{
+			return document.getElementById("stampa").value;
+		}
+
+		function print(s)
+		{
+			document.getElementById("stampa").innerHTML = s;
+		}
 
 		function toChar()
 		{	
@@ -147,15 +170,24 @@
 				var d = deroll(testo);
 				var res1 = onlyTrustZero(d);
 				var res2 = onlyTrustUno(res1);
-				var split = res2.split('');
+				var res3 = de_cbc(res2);
+				var res4 = de_cbc(reverseString(res3));
+				var split = res4.split('');
 			}
 			else
 			{
-				var split = testo.split('');
+				var split = res3.split('');
 			}
 
-			var result = "";
+			var result = bin_char(split);	
 			
+			print(result);
+		}
+
+		function bin_char(split)
+		{
+			var result = "";
+
 			for(let i=0; i<split.length; i=i+7)
 			{
 				{
@@ -179,9 +211,8 @@
 					}
 				}	
 			}
-			document.getElementById("stampa").innerHTML = result;
+			return result;
 		}
-
 
 		function compress1(t,c)
 		{
@@ -230,7 +261,6 @@
 			while(count>0)
 			return start+ r;
 		}
-
 
 		function decompress1(t)
 		{
@@ -283,6 +313,12 @@
 				case "210":
 					r="i";
 				break;
+				case "101":
+					r="j";
+				break;
+				case "310":
+					r="k";
+				break;
 				default:
 					r=block;
 					break;
@@ -322,6 +358,12 @@
 				case "i":
 					r="210";
 				break;
+				case "j":
+					r="101";
+				break;
+				case "k":
+					r="310";
+				break;
 				default:
 					r=char;
 					break;
@@ -341,23 +383,6 @@
 		{
 			var r = decompress1(testo);
 			return r;
-		}
-
-		function test()
-		{
-			alert("No test functions");
-			/*
-			toBin();
-			var testo = document.getElementById("stampa").value;
-			
-			r = roll(testo);
-			d = deroll(r);
-			t1 = onlyTrustZero(d);
-			t2 = onlyTrustUno(t1);
-			//document.getElementById("stampa").innerHTML = "t: " + testo + "\nr: " + r + "\nd: " + d;
-			document.getElementById("stampa").innerHTML = testo + "\n" + r + "\n" + d + "\n" +t2;
-			//document.getElementById("stampa").innerHTML = r;
-			*/
 		}
 
 		function onlyTrustZero(num)
@@ -516,6 +541,151 @@
 			return r;
 		}
 
+		function cbc(c)
+		{
+			//var iv = calcKey();
+			var iv = "0110011"
+			var v1 = "";
+			var v2 = "";
+			var v3 = "";
+			var s = "";
+			var num = c.length; 
+
+			for(var i=0;i<num;i=i+7)
+			{
+				if(i==0)
+				{
+					v1 = getVec(c,i);
+					v3 = xor(iv,v1);
+					s += v3;
+					//alert("primo giro:\n" + iv + "\nxor\n" + v1 +"\n" + s);
+
+				}
+				else
+				{
+					v2 = v3;
+					v1 = getVec(c,i);
+					v3 = xor(v1,v2);
+					s += v3;
+					//alert("giro "+ i + ":\n" + v1 + "\nxor\n" + v2)+"\n"+v3;
+				}
+				//alert("giro "+ i + "\nxor:\n" + v1 + "\n" + v2+"\n"+v3);
+			}
+			return s;
+		}
+
+		function de_cbc(c)
+		{
+			//var iv = calcKey();
+			var iv = "0110011";
+			var v1 = "";
+			var v2 = "";
+			var v3 = "";
+			var s = "";
+			var num = c.length; 
+
+			for(var i=0;i<num;i=i+7)
+			{
+				if(i==0)
+				{
+					v1 = getVec(c,i);
+					v3 = xor(iv,v1);
+					s += v3;
+				}
+				else
+				{
+					v2 = v1;
+					v1 = getVec(c,i);
+					v2 = xor(v1,v2);
+					s += v2;
+				}
+			}
+			return s;
+		}
+
+		function getVec(c,i)
+		{
+			var v = "";
+
+			v += c[i];
+			v += c[i+1];
+			v += c[i+2];
+			v += c[i+3];
+			v += c[i+4];
+			v += c[i+5];
+			v += c[i+6];
+
+			//alert("getVec output: " + v);
+			return v;
+		}
+
+		function xor(v1,v2)
+		{
+			var v3 = "";
+
+			for(var i=0; i<v1.length; i++)
+			{
+				v3 += v1[i]^v2[i];
+			}
+
+			return v3;
+		}
+
+		function test()
+		{
+			alert("No test functions");
+			
+			//s = "110011011100101100001"
+			//toBin();
+
+			//var s = getStampa();
+			////var S0 = s; 
+			////alert("s: "+ s);
+
+			//var s1 = cbc(s);
+			//var s2 = zeroTrust(s1);
+			//var s3 = unoTrust(s2);
+			//var s4 = roll(s3);
+
+			//var t1 = deroll(s4);
+			//var t2 = onlyTrustUno(t1);
+			//var t3 = onlyTrustZero(t2);
+			//var t4 = de_cbc(t3);
+
+			//print("s:  "+s+"\nt3: "+t3+"\nt4: "+t4);
+		}
+
+		function reverseString(r)
+		{
+			var s = r.split('');
+			var s1 = s.reverse();
+
+			return s1;
+		}
+
+		function calcKey()
+		{
+			var k = getK();
+			var vi = "";
+
+			var c = k[0];
+			var v2 = char_bin(c);
+
+			for(var i=1; i<k.length; i++)
+			{
+				c = k[i];
+				c1 = char_bin(c);
+				vi = xor(c1,v2);
+				v2 = vi;
+			}
+			return v2;			
+		}
+
+		function getK()
+		{
+			return document.getElementById("key").value;
+		}
+
 	</script>
 </head>
 <body>
@@ -528,6 +698,10 @@
 		</div>
 		<textarea type="text" id="testo" placeholder="Write here your message"></textarea>
 		<br>
+	<!--
+		<input style="width:300px; margin-bottom: 5px;" type="password"id="key"></input>
+		<br>
+	-->	
 		<button onclick="toBin()" type="button"> Convert </button>
 		<button onclick="toChar()" type="button"> Translate </button>
 		<button onclick="clean()" type="button"> Delete all </button>
