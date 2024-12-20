@@ -41,6 +41,8 @@
 		{
 			document.getElementById("test").style.display = "none";
 			document.getElementById("test1").style.display = "none";
+			document.getElementById("key1").style.display = "none";
+			document.getElementById("key2").style.display = "none";
 		}
 
 		function copy()
@@ -61,6 +63,8 @@
 
 				//TODO da riattivare finiti i test
 				document.getElementById("test").style.display = "block";
+				document.getElementById("key1").style.display = "block";
+				document.getElementById("key2").style.display = "block";
 				//document.getElementById("test1").style.display = "block";
 			}
 
@@ -131,9 +135,10 @@
 
 			if(document.getElementById("test1").style.display == "none")
 			{
-				//TODO da togliere dopo i test su cbc
-				var s1 = cbc(result);
-				var s2 = cbc(reverseString(s1));
+				var key1 = calcKey1();
+				var key2 = calcKey2();
+				var s1 = cbc(result,key1);
+				var s2 = cbc(reverseString(s1),key2.split(''));
 				var res1 = zeroTrust(s2);
 				var res2 = unoTrust(res1);
 				var res3 = roll(res2);
@@ -167,11 +172,15 @@
 			var testo = document.getElementById("testo").value;
 			if(document.getElementById("test1").style.display == "none")
 			{
+				var k1 = calcKey1();
+				var k2 = calcKey2();
 				var d = deroll(testo);
 				var res1 = onlyTrustZero(d);
 				var res2 = onlyTrustUno(res1);
-				var res3 = de_cbc(res2);
-				var res4 = de_cbc(reverseString(res3));
+
+				var res3 = de_cbc(res2,k2);
+				var res4 = de_cbc(reverseString(res3),k1);
+
 				var split = res4.split('');
 			}
 			else
@@ -541,14 +550,15 @@
 			return r;
 		}
 
-		function cbc(c)
+		function cbc(c,key)
 		{
-			//var iv = calcKey();
-			var iv = "0110011"
+			var iv = key;
+			//var iv = "0110011"
 			var v1 = "";
 			var v2 = "";
 			var v3 = "";
 			var s = "";
+
 			var num = c.length; 
 
 			for(var i=0;i<num;i=i+7)
@@ -556,6 +566,10 @@
 				if(i==0)
 				{
 					v1 = getVec(c,i);
+
+					//var v_alga = alga(v1,key);
+					//v3 = xor(iv,v_alga);
+
 					v3 = xor(iv,v1);
 					s += v3;
 					//alert("primo giro:\n" + iv + "\nxor\n" + v1 +"\n" + s);
@@ -565,6 +579,10 @@
 				{
 					v2 = v3;
 					v1 = getVec(c,i);
+
+					//var v_alga = alga(v1,key);
+					//v3 = xor(v_alga,v2);
+
 					v3 = xor(v1,v2);
 					s += v3;
 					//alert("giro "+ i + ":\n" + v1 + "\nxor\n" + v2)+"\n"+v3;
@@ -574,14 +592,15 @@
 			return s;
 		}
 
-		function de_cbc(c)
+		function de_cbc(c,key)
 		{
-			//var iv = calcKey();
-			var iv = "0110011";
+			var iv = key;
+			//var iv = "0110011";
 			var v1 = "";
 			var v2 = "";
 			var v3 = "";
 			var s = "";
+
 			var num = c.length; 
 
 			for(var i=0;i<num;i=i+7)
@@ -590,6 +609,10 @@
 				{
 					v1 = getVec(c,i);
 					v3 = xor(iv,v1);
+
+					//var v_alga = reverse_alga(v3,key);
+					//s += v_alga;
+
 					s += v3;
 				}
 				else
@@ -597,10 +620,32 @@
 					v2 = v1;
 					v1 = getVec(c,i);
 					v2 = xor(v1,v2);
+
+					//var v_alga = reverse_alga(v2,key);
+					//s += v_alga;
+
 					s += v2;
 				}
 			}
 			return s;
+		}
+
+		function alga(v1,k)
+		{
+			var v2 = "";
+
+			v2 = v1+k;
+
+			return v2;
+		}
+
+		function reverse_alga(v2,k)
+		{
+			var v1 = "";
+
+			v1 = v2-k;
+
+			return v1;
 		}
 
 		function getVec(c,i)
@@ -663,9 +708,9 @@
 			return s1;
 		}
 
-		function calcKey()
+		function calcKey1()
 		{
-			var k = getK();
+			var k = getK1();
 			var vi = "";
 
 			var c = k[0];
@@ -681,9 +726,34 @@
 			return v2;			
 		}
 
-		function getK()
+		function calcKey2()
 		{
-			return document.getElementById("key").value;
+			var k = getK2();
+			var vi = "";
+
+			var c = k[0];
+			var v2 = char_bin(c);
+
+			for(var i=1; i<k.length; i++)
+			{
+				c = k[i];
+				c1 = char_bin(c);
+				vi = xor(c1,v2);
+				v2 = vi;
+			}
+			return v2;			
+		}
+
+		function getK1()
+		{
+			//return document.getElementById("key1").value;
+			return "Thor";
+		}
+
+		function getK2()
+		{
+			//return document.getElementById("key2").value;
+			return "Thor";
 		}
 
 	</script>
@@ -697,11 +767,10 @@
 			<p style="font-style: italic;">Conversion swapped to version 2</p>
 		</div>
 		<textarea type="text" id="testo" placeholder="Write here your message"></textarea>
+		
+		<input placeholder="key 1" style="width:300px; margin-bottom: 5px;" type="password"id="key1"></input>
+		<input placeholder="key 2" style="width:300px; margin-bottom: 5px;" type="password"id="key2"></input>
 		<br>
-	<!--
-		<input style="width:300px; margin-bottom: 5px;" type="password"id="key"></input>
-		<br>
-	-->	
 		<button onclick="toBin()" type="button"> Convert </button>
 		<button onclick="toChar()" type="button"> Translate </button>
 		<button onclick="clean()" type="button"> Delete all </button>
